@@ -1,18 +1,35 @@
-@file:Suppress("PropertyName")
-
 plugins {
-    kotlin("jvm")
+    buildsrc.convention.`kotlin-multiplatform`
+    buildsrc.convention.`publish-kotlin-multiplatform`
 }
 
-dependencies {
-    api(projects.baseFetcher)
-    api(Deps.htmlUnit) {
-        exclude("org.eclipse.jetty.websocket") // avoid android crash; see #93
-    }
-    val log4jOverSlf4jVersion = "1.7.30"
-    val logbackVersion = "1.2.3"
-    api("ch.qos.logback:logback-classic:$logbackVersion")
-    api("org.slf4j:log4j-over-slf4j:$log4jOverSlf4jVersion")
+kotlin {
+    jvm {}
+    sourceSets {
 
-    testImplementation(project(path = ":test-utils", configuration = "default"))
+        val commonMain by getting {
+            dependencies {
+                api(projects.fetcher.baseFetcher)
+            }
+        }
+
+        val jvmMain by getting {
+            dependencies {
+                api(Deps.htmlUnit) {
+                    exclude("org.eclipse.jetty.websocket") // avoid android crash; see #93
+                }
+
+                val log4jOverSlf4jVersion = "1.7.36"
+                val logbackVersion = "1.2.11"
+                api("ch.qos.logback:logback-classic:$logbackVersion")
+                api("org.slf4j:log4j-over-slf4j:$log4jOverSlf4jVersion")
+            }
+        }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation(projects.testUtils)
+            }
+        }
+    }
 }

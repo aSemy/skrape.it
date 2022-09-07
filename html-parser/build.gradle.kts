@@ -1,19 +1,29 @@
 plugins {
-    kotlin("jvm")
+    buildsrc.convention.`kotlin-multiplatform`
+    buildsrc.convention.kover
 }
 
-java {
-    registerFeature("jsExecution") {
-        usingSourceSet(sourceSets["main"])
+kotlin {
+    jvm {}
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(projects.dsl)
+                api(projects.fetcher.baseFetcher)
+                api(projects.fetcher.browserFetcher)
+            }
+        }
+
+        val jvmMain by getting {
+            dependencies {
+                api(Deps.jsoup)
+            }
+        }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation(projects.testUtils)
+            }
+        }
     }
-}
-
-dependencies {
-    implementation(projects.dsl)
-    api(projects.baseFetcher)
-    api(Deps.jsoup)
-
-    "jsExecutionImplementation"(project(path = ":browser-fetcher", configuration = "default"))
-
-    testImplementation(project(path = ":test-utils", configuration = "default"))
 }
